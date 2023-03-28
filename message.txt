@@ -1,0 +1,82 @@
+import sqlite3
+
+def toStringNomPrenom(nom, prenom):
+        return "Prenom : " + prenom + " , nom : " + nom
+def getJournalisteById(id):
+    con = sqlite3.connect("tp.db")
+    cur = con.cursor()
+    query = f"SELECT nom, prenom FROM Journaliste WHERE idJournaliste = ?;"
+    cur.execute(query, (id,))
+    print(cur.fetchone()[0])
+
+con = sqlite3.connect("tp.db")
+
+cur = con.cursor()
+
+
+#Cursor permet de se balader dans les lignes renvoyer par la requete
+#On peut par ex les récupérer, les modifier...
+
+
+#Commit permet d'enregistrer les modifs dans la base
+#Sans commit c'est seulement modifié en local
+"""
+cur.execute("INSERT INTO Article(titre, category) VALUES ('titreQuentin', 'tech')")
+cur.execute("INSERT INTO Article(titre, category) VALUES ('titreLuke', 'sport')")
+for row in cur.execute("SELECT * FROM Article"):
+    print(row)
+"""
+#Ensuite si on print en enlevant la requete, les ajouts d'articles ne sont pas la 
+
+#Avec commit, 
+
+cur.execute("INSERT INTO Journaliste(nom, prenom) VALUES ('Quentin', 'filleule')")
+cur.execute("INSERT INTO Journaliste(nom, prenom) VALUES ('Luke', 'develay')")
+
+for row in cur.execute("SELECT * FROM Journaliste"):
+    print(row)
+con.commit()
+#Ensuite si on print en enlevant les requetes, les modifications ont bien ete enregistré
+
+#3
+for row in cur.execute("SELECT * FROM Journaliste"):
+    print(row)
+
+#3)a)
+con.create_function("toString", 2, toStringNomPrenom)
+sqlQuery = "SELECT toString(nom, prenom) FROM Journaliste WHERE idJournaliste = 1"
+cur.execute(sqlQuery)
+print(*cur.fetchone())
+
+#3)b)
+getJournalisteById(1)
+
+#3)c)
+
+class mySum:
+    def __init__(self):
+        self.maxi = 0
+
+    def step(self, value):
+        if(self.maxi < len(value)):
+             self.maxi = len(value)
+
+    def finalize(self):
+        return self.maxi
+
+
+
+con.create_aggregate("mysum", 1, mySum)
+cur.execute("SELECT mysum(nom) FROM Journaliste")
+print(cur.fetchone()[0])
+
+#Agrégat retourne une valeur par table
+#fonction scalaire retourne une valeur par ligne
+def fonction4d():
+    con = sqlite3.connect("tp.db")
+    cur = con.cursor()
+    con.create_aggregate("mysum", 1, mySum)
+    cur.execute("SELECT mysum(nom) FROM Journaliste")
+    print(cur.fetchone()[0])
+#4)d)
+fonction4d()
